@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>All Intercoolers</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: #0f1117;
+      color: #e2e8f0;
+      min-height: 100vh;
+      padding: 2rem 1rem;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 2.5rem;
+    }
+
+    header h1 {
+      font-size: 2.2rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, #f97316, #ef4444);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      letter-spacing: -0.5px;
+    }
+
+    header p {
+      color: #64748b;
+      margin-top: 0.4rem;
+      font-size: 0.95rem;
+    }
+
+    #status {
+      text-align: center;
+      color: #64748b;
+      font-size: 0.95rem;
+      margin-bottom: 1.5rem;
+      min-height: 1.5rem;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 1.25rem;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .card {
+      background: #1e2130;
+      border: 1px solid #2d3348;
+      border-radius: 14px;
+      padding: 1.4rem 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+    }
+
+    .card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 12px 32px rgba(0,0,0,0.4);
+      border-color: #f97316;
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 0.5rem;
+    }
+
+    .card-name {
+      font-size: 1.05rem;
+      font-weight: 600;
+      color: #f1f5f9;
+      line-height: 1.3;
+    }
+
+    .card-id {
+      font-size: 0.75rem;
+      color: #475569;
+      background: #0f1117;
+      border-radius: 6px;
+      padding: 2px 7px;
+      white-space: nowrap;
+    }
+
+    .badge-price {
+      display: inline-block;
+      background: linear-gradient(135deg, #f97316, #ef4444);
+      color: #fff;
+      font-weight: 700;
+      font-size: 1.1rem;
+      border-radius: 8px;
+      padding: 0.3rem 0.8rem;
+      width: fit-content;
+    }
+
+    .divider {
+      border: none;
+      border-top: 1px solid #2d3348;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.6rem;
+    }
+
+    .stat {
+      background: #161924;
+      border-radius: 8px;
+      padding: 0.55rem 0.75rem;
+    }
+
+    .stat-label {
+      font-size: 0.7rem;
+      color: #64748b;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 2px;
+    }
+
+    .stat-value {
+      font-size: 0.92rem;
+      font-weight: 600;
+      color: #cbd5e1;
+    }
+
+    .card-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      color: #f97316;
+      font-size: 0.85rem;
+      font-weight: 500;
+      text-decoration: none;
+      margin-top: auto;
+      transition: color 0.15s;
+      word-break: break-all;
+    }
+
+    .card-link:hover { color: #fb923c; text-decoration: underline; }
+
+    .error-msg {
+      text-align: center;
+      color: #ef4444;
+      background: #1e1010;
+      border: 1px solid #7f1d1d;
+      border-radius: 10px;
+      padding: 1rem 1.5rem;
+      max-width: 500px;
+      margin: 2rem auto;
+    }
+
+    .empty-msg {
+      text-align: center;
+      color: #475569;
+      margin-top: 3rem;
+      font-size: 1rem;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>🔧 Intercoolers</h1>
+    <p>Full database listing</p>
+  </header>
+
+  <div id="status">Loading…</div>
+  <div class="grid" id="grid"></div>
+
+  <script>
+    async function loadIntercoolers() {
+      const status = document.getElementById('status')
+      const grid = document.getElementById('grid')
+
+      try {
+        const res = await fetch('/intercoolers')
+        if (!res.ok) throw new Error(`Server returned ${res.status}`)
+        const rows = await res.json()
+
+        if (rows.length === 0) {
+          status.textContent = ''
+          grid.innerHTML = '<p class="empty-msg">No intercoolers found in the database.</p>'
+          return
+        }
+
+        status.textContent = `Showing ${rows.length} intercooler${rows.length !== 1 ? 's' : ''}`
+
+        grid.innerHTML = rows.map(r => `
+          <div class="card">
+            <div class="card-header">
+              <span class="card-name">${esc(r.name)}</span>
+              <span class="card-id">#${r.id}</span>
+            </div>
+
+            <div class="badge-price">${r.price != null ? '$' + Number(r.price).toFixed(2) : '—'}</div>
+
+            <hr class="divider" />
+
+            <div class="stats">
+              <div class="stat">
+                <div class="stat-label">Capacity</div>
+                <div class="stat-value">${r.capacityCm3 != null ? Number(r.capacityCm3).toLocaleString() + ' cm³' : '—'}</div>
+              </div>
+              <div class="stat">
+                <div class="stat-label">Price / cm³</div>
+                <div class="stat-value">${r.pricePerCm3 != null ? '$' + Number(r.pricePerCm3).toFixed(4) : '—'}</div>
+              </div>
+              ${ r.dimensions ? `
+              <div class="stat" style="grid-column:1/-1">
+                <div class="stat-label">Dimensions</div>
+                <div class="stat-value">${esc(r.dimensions)}</div>
+              </div>` : ''}
+            </div>
+
+            ${ r.url ? `<a class="card-link" href="${esc(r.url)}" target="_blank" rel="noopener">🔗 ${esc(r.url)}</a>` : '' }
+          </div>
+        `).join('')
+
+      } catch (err) {
+        status.textContent = ''
+        grid.innerHTML = `<div class="error-msg">⚠️ Failed to load data:<br><strong>${err.message}</strong></div>`
+      }
+    }
+
+    function esc(str) {
+      return String(str ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')
+    }
+
+    loadIntercoolers()
+  </script>
+
+</body>
+</html>
