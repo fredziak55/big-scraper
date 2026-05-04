@@ -1,13 +1,16 @@
+// TODO Change syntax to ES6
 const cheerio = require('cheerio'); 
 const sqlite3 = require('sqlite3');
 
+// TODO Move to .env
 const BASE_URL = 'https://fmic.pl/uklad-chlodzenia/intercoolery'; 
 
 // Otwiera / tworzy baze danych i upewnia sie ze tabela istnieje
 function openDb() {
   return new Promise((resolve, reject) => {
-    const db = new sqlite3.Database('cars.db', (err) => {
+    const db = new sqlite3.Database(__dirname + '/../db/cars.db', (err) => {
       if (err) return reject(err);
+      //TODO change naming in database
       db.run(
         `CREATE TABLE IF NOT EXISTS intercoolers (
           id          INTEGER PRIMARY KEY AUTOINCREMENT,

@@ -1,3 +1,4 @@
+//TODO Add prism (ORM and migrations)
 const express = require('express')
 const app = express()
 const port = 3000
@@ -7,9 +8,10 @@ app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
 app.use(express.static('public'))
 
-const db = new sqlite3.Database('cars.db')
+const db = new sqlite3.Database(__dirname + '/../db/cars.db')
 db.run('CREATE TABLE IF NOT EXISTS intercoolers (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, price REAL, dimensions TEXT, url TEXT UNIQUE, capacityCm3 REAL, pricePerCm3 REAL)')
 
+//TODO Think about better (ANY) security
 app.get('/intercoolers', (req, res) => {
   db.all('SELECT * FROM intercoolers', (err, rows) => {
     if (err) {
@@ -21,6 +23,7 @@ app.get('/intercoolers', (req, res) => {
 })
 
 app.post('/scrape', async (req, res) => {
+  // TODO Send message to queue instead of synch processing, retunr 201 code
   const { scrapeIntercoolers } = require('./scraper')
   const maxPages = parseInt(req.body?.max_pages) || 0
   await scrapeIntercoolers(maxPages)
