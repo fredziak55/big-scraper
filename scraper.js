@@ -140,6 +140,13 @@ async function scrapeIntercoolers(maxPages) {
   // Zapis do bazy danych
   console.log(`\nZapisywanie ${results.length} produktów do cars.db...`);
   const db = await openDb();
+
+  // Czyszczenie starej zawartosci przed nowym scrapingiem
+  await new Promise((resolve, reject) =>
+    db.run('DELETE FROM intercoolers', (err) => err ? reject(err) : resolve())
+  );
+  console.log('Stare dane usuniete.');
+
   let saved = 0;
 
   for (const prod of results) {
