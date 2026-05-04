@@ -37,7 +37,7 @@ function insertProduct(db, prod) {
 }
 
 async function scrapeIntercoolers(maxPages) { 
-  const MAX_PAGES = parseInt(maxPages) || Number.parseInt(process.env.MAX_PAGES || '0', 10); //0 oznacza brak limitu
+  const MAX_PAGES = parseInt(maxPages) || 0; // 0 = brak limitu
   let page = 1; 
   let allProducts = []; 
 
