@@ -3,13 +3,11 @@ const express = require('express')
 const app = express()
 const port = 3000
 const sqlite3 = require('sqlite3')
+const db = require('./models/createDatabase.js') 
 
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
 app.use(express.static('public'))
-
-const db = new sqlite3.Database(__dirname + '/../db/cars.db')
-db.run('CREATE TABLE IF NOT EXISTS intercoolers (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, price REAL, dimensions TEXT, url TEXT UNIQUE, capacityCm3 REAL, pricePerCm3 REAL)')
 
 //TODO Think about better (ANY) security
 app.get('/intercoolers', (req, res) => {

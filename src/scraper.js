@@ -1,31 +1,10 @@
 // TODO Change syntax to ES6
 const cheerio = require('cheerio'); 
 const sqlite3 = require('sqlite3');
+const database = require('./models/createDatabase.js')
 
 // TODO Move to .env
 const BASE_URL = 'https://fmic.pl/uklad-chlodzenia/intercoolery'; 
-
-// Otwiera / tworzy baze danych i upewnia sie ze tabela istnieje
-function openDb() {
-  return new Promise((resolve, reject) => {
-    const db = new sqlite3.Database(__dirname + '/../db/cars.db', (err) => {
-      if (err) return reject(err);
-      //TODO change naming in database
-      db.run(
-        `CREATE TABLE IF NOT EXISTS intercoolers (
-          id          INTEGER PRIMARY KEY AUTOINCREMENT,
-          name        TEXT,
-          price       REAL,
-          dimensions  TEXT,
-          url         TEXT UNIQUE,
-          capacityCm3 REAL,
-          pricePerCm3 REAL
-        )`,
-        (err) => { if (err) return reject(err); resolve(db); }
-      );
-    });
-  });
-}
 
 // Wstawia jeden produkt; ignoruje duplikaty dzieki UNIQUE na url
 function insertProduct(db, prod) {
@@ -142,7 +121,7 @@ async function scrapeIntercoolers(maxPages) {
 
   // Zapis do bazy danych
   console.log(`\nZapisywanie ${results.length} produktów do cars.db...`);
-  const db = await openDb();
+  const db = database; // Używamy otwartej bazy danych z createDatabase.js
 
   // Czyszczenie starej zawartosci przed nowym scrapingiem
   await new Promise((resolve, reject) =>
