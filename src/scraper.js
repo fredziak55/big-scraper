@@ -1,7 +1,7 @@
 // TODO Change syntax to ES6
-const cheerio = require('cheerio'); 
-const sqlite3 = require('sqlite3');
-const database = require('./models/createDatabase.js')
+import * as cheerio from 'cheerio'
+import sqlite3 from 'sqlite3'
+import createDatabase from './models/createDatabase.js'
 
 // TODO Move to .env
 const BASE_URL = 'https://fmic.pl/uklad-chlodzenia/intercoolery'; 
@@ -121,7 +121,7 @@ async function scrapeIntercoolers(maxPages) {
 
   // Zapis do bazy danych
   console.log(`\nZapisywanie ${results.length} produktów do cars.db...`);
-  const db = database; // Używamy otwartej bazy danych z createDatabase.js
+  const db = createDatabase(); // Tworzymy nowe połączenie z bazą danych
 
   // Czyszczenie starej zawartosci przed nowym scrapingiem
   await new Promise((resolve, reject) =>
@@ -149,4 +149,4 @@ async function scrapeIntercoolers(maxPages) {
   });
 }
 
-module.exports = { scrapeIntercoolers };
+export default scrapeIntercoolers;

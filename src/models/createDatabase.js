@@ -1,4 +1,9 @@
-const sqlite3 = require('sqlite3')
+import sqlite3 from 'sqlite3'
+import path from 'path'
+import { fileURLToPath } from 'url'
+
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename)
 
 const createDatabase = () => {
   const db = new sqlite3.Database(__dirname + '/../../db/cars.db')
@@ -8,4 +13,4 @@ const createDatabase = () => {
 }
 
 // TODO Read what is a singleton
-module.exports = createDatabase()
+export default createDatabase

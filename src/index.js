@@ -1,9 +1,9 @@
 //TODO Add prism (ORM and migrations)
-const express = require('express')
+import express from 'express'
+import sqlite3 from 'sqlite3'
+import db from './models/createDatabase.js'
 const app = express()
 const port = 3000
-const sqlite3 = require('sqlite3')
-const db = require('./models/createDatabase.js') 
 
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
@@ -22,7 +22,7 @@ app.get('/intercoolers', (req, res) => {
 
 app.post('/scrape', async (req, res) => {
   // TODO Send message to queue instead of synch processing, retunr 201 code
-  const { scrapeIntercoolers } = require('./scraper')
+  const { default: scrapeIntercoolers } = await import('./scraper.js')
   const maxPages = parseInt(req.body?.max_pages) || 0
   await scrapeIntercoolers(maxPages)
   res.send(`Scraping done! (max_pages=${maxPages || 'unlimited'})`)
