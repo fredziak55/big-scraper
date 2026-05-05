@@ -4,7 +4,8 @@ import sqlite3 from 'sqlite3'
 import createDatabase from './models/createDatabase.js'
 
 // TODO Move to .env
-const BASE_URL = 'https://fmic.pl/uklad-chlodzenia/intercoolery'; 
+const BASE_URL = `${process.env.BASE_URL}`; 
+console.log(`BASE_URL: ${BASE_URL}`);
 
 // Wstawia jeden produkt; ignoruje duplikaty dzieki UNIQUE na url
 function insertProduct(db, prod) {
