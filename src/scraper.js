@@ -1,9 +1,7 @@
-// TODO Change syntax to ES6
 import * as cheerio from 'cheerio'
 import sqlite3 from 'sqlite3'
 import createDatabase from './models/createDatabase.js'
 
-// TODO Move to .env
 const BASE_URL = `${process.env.BASE_URL}`; 
 console.log(`BASE_URL: ${BASE_URL}`);
 
