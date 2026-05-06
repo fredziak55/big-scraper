@@ -1,7 +1,12 @@
 //TODO Add prism (ORM and migrations)
+"use strict"
+
 import express from 'express'
 import sqlite3 from 'sqlite3'
 import db from './models/createDatabase.js'
+import intercoolersRouter from './routes/intercoolers.js'
+import createDatabase from './models/createDatabase.js'
+
 const app = express()
 const port = 3000
 
@@ -9,16 +14,7 @@ app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
 app.use(express.static('public'))
 
-//TODO Think about better (ANY) security
-app.get('/intercoolers', (req, res) => {
-  db.all('SELECT * FROM intercoolers', (err, rows) => {
-    if (err) {
-      res.status(500).send(err.message)
-    } else {
-      res.json(rows)
-    }
-  })
-})
+intercoolersRouter(app)
 
 app.post('/scrape', async (req, res) => {
   // TODO Send message to queue instead of synch processing, retunr 201 code
@@ -30,7 +26,7 @@ app.post('/scrape', async (req, res) => {
 
 
 app.listen(port, () => {
-  console.log(`Example app listening on port ${port}`)
+  console.log(`Big scraper listening on port ${port}`)
 })
 
 

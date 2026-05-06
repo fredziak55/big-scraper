@@ -1,20 +1,18 @@
 import * as cheerio from 'cheerio'
 import sqlite3 from 'sqlite3'
-import createDatabase from './models/createDatabase.js'
+import * as connection from './models/connectToDatabase.js'
 
 const BASE_URL = `${process.env.BASE_URL}`; 
 console.log(`BASE_URL: ${BASE_URL}`);
 
 // Wstawia jeden produkt; ignoruje duplikaty dzieki UNIQUE na url
-function insertProduct(db, prod) {
-  return new Promise((resolve, reject) => {
-    db.run(
-      `INSERT OR IGNORE INTO intercoolers (name, price, dimensions, url, capacityCm3, pricePerCm3)
-       VALUES (?, ?, ?, ?, ?, ?)`,
-      [prod.name, prod.price, prod.wymiary, prod.url, prod.pojemnoscCm3, prod.cenaZaCm3],
-      function (err) { if (err) return reject(err); resolve(this.changes); }
-    );
-  });
+async function insertProduct(db, prod) {
+  const result = await db.run(
+    `INSERT OR IGNORE INTO intercoolers (name, price, dimensions, url, capacityCm3, pricePerCm3)
+     VALUES (?, ?, ?, ?, ?, ?)`,
+    [prod.name, prod.price, prod.wymiary, prod.url, prod.pojemnoscCm3, prod.cenaZaCm3]
+  );
+  return result.changes;
 }
 
 async function scrapeIntercoolers(maxPages) { 
@@ -120,12 +118,10 @@ async function scrapeIntercoolers(maxPages) {
 
   // Zapis do bazy danych
   console.log(`\nZapisywanie ${results.length} produktów do cars.db...`);
-  const db = createDatabase(); // Tworzymy nowe połączenie z bazą danych
+  const db = await connection.openDb(); 
 
   // Czyszczenie starej zawartosci przed nowym scrapingiem
-  await new Promise((resolve, reject) =>
-    db.run('DELETE FROM intercoolers', (err) => err ? reject(err) : resolve())
-  );
+  await db.run('DELETE FROM intercoolers');
   console.log('Stare dane usuniete.');
 
   let saved = 0;
@@ -135,7 +131,7 @@ async function scrapeIntercoolers(maxPages) {
     if (changes) saved++;
   }
 
-  db.close();
+  await db.close();
   console.log(`Zapisano ${saved} nowych rekordów do cars.db (pominięto duplikaty).`);
 
   // Podglad wynikow w konsoli

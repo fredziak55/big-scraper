@@ -13,4 +13,4 @@ const createDatabase = () => {
 }
 
 // TODO Read what is a singleton
-export default createDatabase
+export default createDatabase()
