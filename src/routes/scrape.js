@@ -9,7 +9,6 @@ const scrapeIntercoolers = (app) => {
     app.post('/scrape', async (req, res) => {
         await purgeIntercoolers();
         const MAX_PAGES = parseInt(req.body?.max_pages) || 0
-        // const MAX_PAGES = parseInt(maxPages) || 0; // 0 = brak limitu
         let page = 1;
 
         console.log("pobieranie listy produktów");
@@ -17,12 +16,11 @@ const scrapeIntercoolers = (app) => {
         while (true) {
             let productsOnPage = [];
             if (MAX_PAGES > 0 && page > MAX_PAGES) {
-                //do limitu
                 console.log(`Osiągnięto limit stron MAX_PAGES=${MAX_PAGES}.`);
                 break;
             }
 
-            const url = page === 1 ? BASE_URL : `${BASE_URL}?p=${page}`; // Strona 1 ma inny URL niz kolejne - nie pokazuje numeru
+            const url = `${BASE_URL}?p=${page}`; 
             console.log(`Pobieram stronę ${page}...`);
 
             try {
