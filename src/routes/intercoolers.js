@@ -1,4 +1,4 @@
-import getIntercoolers from "../models/getIntercoolers.js";
+import { getIntercoolers } from "../models/intercoolers.model.js";
 
 const intercoolersRouter = (app) => {
     app.get('/intercoolers', async (req, res) => {

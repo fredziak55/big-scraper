@@ -1,6 +1,6 @@
 import * as cheerio from "cheerio";
 import insertProduct from "../models/insertScrapedProducts.js";
-import purgeIntercoolers from "../models/purgeIntercoolers.js";
+import { purgeIntercoolers } from "../models/intercoolers.model.js";
 
 const BASE_URL = `${process.env.BASE_URL}`;
 console.log(`BASE_URL: ${BASE_URL}`);

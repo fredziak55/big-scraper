@@ -1,4 +1,4 @@
-import { openDb } from './connectToDatabase.js'
+import { openDb } from './database.model.js'
 
 const insertProduct = async (name, price, url, dimensions, capacityCm3, pricePerCm3) => {
     try {

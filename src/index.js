@@ -3,10 +3,9 @@
 
 import express from 'express'
 import sqlite3 from 'sqlite3'
-import db from './models/createDatabase.js'
 import intercoolersRouter from './routes/intercoolers.js'
-import createDatabase from './models/createDatabase.js'
 import scrapeIntercoolers from './routes/scrape.js'
+import { createDatabase }  from './models/database.model.js'
 
 const app = express()
 const port = 3000
