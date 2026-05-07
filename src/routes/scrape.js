@@ -13,7 +13,7 @@ const scrapeIntercoolers = (app) => {
 
         console.log("pobieranie listy produktów");
 
-        while (true) {
+        while (true) { // FIXME while (true) to raczej słaby typ loopa
             let productsOnPage = [];
             if (MAX_PAGES > 0 && page > MAX_PAGES) {
                 console.log(`Osiągnięto limit stron MAX_PAGES=${MAX_PAGES}.`);
@@ -81,8 +81,8 @@ const scrapeIntercoolers = (app) => {
                         const html = await res.text();
 
                         // Normalizacja tresci i regex do formatu rdzenia
-                        const cleanHtml = html.replace(/&nbsp;/g, " ").replace(/×/g, "x"); //usuwanie spacji
-                        const regex = /(\d{2,4})\s*x\s*(\d{2,4})\s*x\s*(\d{2,4})\s*mm/i; // Trzy wymiary w mm
+                        const cleanHtml = html.replace(/&nbsp;/g, " ").replace(/×/g, "x"); //usuwanie spacji FIXME Czystszy sposób
+                        const regex = /(\d{2,4})\s*x\s*(\d{2,4})\s*x\s*(\d{2,4})\s*mm/i; // Trzy wymiary w mm TODO git!
 
                         const match = cleanHtml.match(regex);
 
@@ -92,7 +92,8 @@ const scrapeIntercoolers = (app) => {
                             const c = parseInt(match[3]);
 
                             // filtrowanie bledow
-                            if (a > 20 && b > 20 && c > 20) {
+                            if (a > 20 && b > 20 && c > 20) {  // FIXME Magic number what is 20 - move to constant and describe
+                                // FIXME a, b, c to nie matma
                                 const pojemnoscCm3 = (a * b * c) / 1000;
                                 const cenaZaCm3 = prod.price / pojemnoscCm3;
                                 

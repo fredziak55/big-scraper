@@ -15,12 +15,10 @@ app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
 app.use(express.static('public'))
 
+createDatabase()
 intercoolersRouter(app)
 scrapeIntercoolers(app)
 
 app.listen(port, () => {
   console.log(`Big scraper listening on port ${port}`)
 })
-
-
-
