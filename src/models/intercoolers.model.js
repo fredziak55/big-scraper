@@ -25,3 +25,25 @@ export const purgeIntercoolers = async () => {
         throw err;
     }
 }
+
+export const insertIntercoolers = async (intercoolers) => {
+    try {
+        const db = await openDb();
+        for (const intercooler of intercoolers) {
+            await db.run(
+                `INSERT OR IGNORE INTO intercoolers (name, price, dimensions, url, capacityCm3, pricePerCm3)
+                 VALUES (?, ?, ?, ?, ?, ?)`,
+                intercooler.name,
+                intercooler.price,
+                intercooler.dimensions,
+                intercooler.url,
+                intercooler.volumeCm3,
+                intercooler.priceFor1Cm3
+            );
+        }
+        await db.close();
+    } catch (err) {
+        console.error('Error inserting intercooler:', err);
+        throw err;
+    }
+}
