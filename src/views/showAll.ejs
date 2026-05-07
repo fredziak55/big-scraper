@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>All Intercoolers</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/css/styles.css" />
+</head>
+<body class="list-page">
+
+  <header class="list-header">
+    <a href="/" style="text-decoration:none;color:inherit;">
+      <h1>🔧 Intercoolers</h1>
+    </a>
+    <p>Full database listing</p>
+  </header>
+
+  <% if (intercoolers.length === 0) { %>
+    <div id="status"></div>
+    <div class="grid">
+      <p class="empty-msg">No intercoolers found in the database.</p>
+    </div>
+  <% } else { %>
+    <div id="status">
+      Showing <%= intercoolers.length %> intercooler<%= intercoolers.length !== 1 ? 's' : '' %>
+    </div>
+    <div class="grid" id="grid">
+      <% intercoolers.forEach(function(r) { %>
+        <div class="card">
+          <div class="card-header">
+            <span class="card-name"><%= r.name %></span>
+            <span class="card-id">#<%= r.id %></span>
+          </div>
+
+          <div class="badge-price">
+            <%= r.price != null ? '$' + Number(r.price).toFixed(2) : '—' %>
+          </div>
+
+          <hr class="divider" />
+
+          <div class="card-stats">
+            <div class="card-stat">
+              <div class="card-stat-label">Capacity</div>
+              <div class="card-stat-value">
+                <%= r.capacityCm3 != null ? Number(r.capacityCm3).toLocaleString() + ' cm³' : '—' %>
+              </div>
+            </div>
+            <div class="card-stat">
+              <div class="card-stat-label">Price / cm³</div>
+              <div class="card-stat-value">
+                <%= r.pricePerCm3 != null ? '$' + Number(r.pricePerCm3).toFixed(4) : '—' %>
+              </div>
+            </div>
+            <% if (r.dimensions) { %>
+              <div class="card-stat" style="grid-column:1/-1">
+                <div class="card-stat-label">Dimensions</div>
+                <div class="card-stat-value"><%= r.dimensions %></div>
+              </div>
+            <% } %>
+          </div>
+
+          <% if (r.url) { %>
+            <a class="card-link" href="<%= r.url %>" target="_blank" rel="noopener">
+              🔗 <%= r.url %>
+            </a>
+          <% } %>
+        </div>
+      <% }); %>
+    </div>
+  <% } %>
+
+</body>
+</html>
