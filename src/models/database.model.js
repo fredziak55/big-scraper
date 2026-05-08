@@ -12,7 +12,7 @@ export const createDatabase = () => {
   db.close()
 }
 
-export async function openDb () {
+export const openDb = async () => {
   return open({
     filename: __dirname + '/../../db/cars.db',
     driver: sqlite3.Database

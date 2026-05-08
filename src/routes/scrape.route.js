@@ -3,7 +3,7 @@ import scrapeIntercoolers from "../utils/scrape.js";
 
 const getscrapedIntercoolers = (app) => {
     app.post('/scrape', async (req, res) => {
-        scrapeIntercoolers(app);
+        scrapeIntercoolers(app, req, res);
     });
 }
 
