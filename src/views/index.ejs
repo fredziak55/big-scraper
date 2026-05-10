@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Intercooler DB</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" type="text/css" href="/css/styles.css" />
+</head>
+<body class="home-page">
+
+  <div class="blob blob-1"></div>
+  <div class="blob blob-2"></div>
+  <div class="blob blob-3"></div>
+
+  <div id="loading-modal" class="modal">
+    <div class="modal-content">
+      <div id="modal-spinner" class="spinner"></div>
+      <p id="modal-text">Scraping in progress...</p>
+      <button id="modal-ok-btn" class="cta" style="display: none;">OK</button>
+    </div>
+  </div>
+
+  <div class="hero">
+    <span class="icon">🔧</span>
+    <h1>Intercooler Database</h1>
+    <p class="subtitle">
+      Browse, compare, and explore car intercoolers.<br />
+      All data in one place — fast, searchable, up to date.
+    </p>
+    <a class="cta" href="/showall">
+      View All Intercoolers →
+    </a>
+
+    <div class="scrape-container">
+      <input type="number" id="max-pages" min="1" placeholder="Pages to scrape (e.g. 5)" />
+      <button id="scrape-btn" class="cta scrape-cta">Run Scraper ⚡</button>
+    </div>
+
+    <div class="stats">
+      <div class="stat">
+        <div class="stat-value" id="count"><%= count %></div>
+        <div class="stat-label">Intercoolers</div>
+      </div>
+      <div class="stat">
+        <div class="stat-value">cm³</div>
+        <div class="stat-label">Capacity tracked</div>
+      </div>
+      <div class="stat">
+        <div class="stat-value">$</div>
+        <div class="stat-label">Prices included</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const scrapeBtn = document.getElementById('scrape-btn');
+    const maxPagesInput = document.getElementById('max-pages');
+    const modal = document.getElementById('loading-modal');
+    const modalText = document.getElementById('modal-text');
+    const modalSpinner = document.getElementById('modal-spinner');
+    const modalOkBtn = document.getElementById('modal-ok-btn');
+
+    scrapeBtn.addEventListener('click', async () => {
+      const maxPages = maxPagesInput.value;
+
+      modalText.textContent = 'Scraping in progress...';
+      modalSpinner.style.display = 'block';
+      modalOkBtn.style.display = 'none';
+      modal.classList.add('show');
+
+      try {
+        const response = await fetch('/scrape', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ max_pages: maxPages ? parseInt(maxPages) : 0 })
+        });
+
+        if (response.ok) {
+          modalText.textContent = 'Scraping completed successfully!';
+        } else {
+          modalText.textContent = 'Scraping failed.';
+        }
+      } catch (error) {
+        modalText.textContent = 'An error occurred during scraping.';
+      } finally {
+        modalSpinner.style.display = 'none';
+        modalOkBtn.style.display = 'inline-flex';
+      }
+    });
+
+    modalOkBtn.addEventListener('click', () => {
+      modal.classList.remove('show');
+      fetch('/intercoolers')
+        .then(r => r.json())
+        .then(rows => {
+          document.getElementById('count').textContent = rows.length;
+        })
+        .catch(() => {});
+    });
+  </script>
+
+</body>
+</html>
