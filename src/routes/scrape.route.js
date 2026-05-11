@@ -1,12 +1,8 @@
-import * as cheerio from "cheerio";
-import scrapeIntercoolers from "../utils/scrape.js";
+import express from 'express';
+import * as scrapeController from "../controllers/scrape.controller.js";
 
-// DEPRECATED
-const getscrapedIntercoolers = (app) => {
-    // TODO Refactor into queue worker
-    app.post('/scrape', async (req, res) => {
-        scrapeIntercoolers(app, req, res);
-    });
-}
+const router = express.Router();
 
-export default getscrapedIntercoolers;
+router.post('/', scrapeController.scrape);
+
+export default router
