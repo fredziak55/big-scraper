@@ -30,7 +30,6 @@ services:
       - app-network
   worker:
     image: node:22-alpine
-    container_name: big-scraper-worker
     working_dir: /app
     volumes:
       - .:/app
@@ -41,7 +40,7 @@ services:
     environment:
       - REDIS_HOST=redis
       - REDIS_PORT=6379
-    command: sh -c "npm install && node src/queue/worker/worker.js"
+    command: sh -c "[ -d node_modules/express ] || npm install && node src/queue/worker/worker.js"
     depends_on:
       - redis
     networks:
