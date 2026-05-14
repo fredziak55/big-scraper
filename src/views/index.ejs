@@ -64,7 +64,7 @@
     scrapeBtn.addEventListener('click', async () => {
       const maxPages = maxPagesInput.value;
 
-      modalText.textContent = 'Scraping in progress...';
+      modalText.textContent = 'Enqueuing jobs...';
       modalSpinner.style.display = 'block';
       modalOkBtn.style.display = 'none';
       modal.classList.add('show');
@@ -76,14 +76,35 @@
           body: JSON.stringify({ max_pages: maxPages ? parseInt(maxPages) : 0 })
         });
 
-        if (response.ok) {
-          modalText.textContent = 'Scraping completed successfully!';
-        } else {
-          modalText.textContent = 'Scraping failed.';
+        if (!response.ok) {
+          modalText.textContent = 'Failed to start scraping.';
+          modalSpinner.style.display = 'none';
+          modalOkBtn.style.display = 'inline-flex';
+          return;
         }
-      } catch (error) {
+
+        const poll = setInterval(async () => {
+          try {
+            const res = await fetch('/scrape/status');
+            const status = await res.json();
+
+            if (status.done) {
+              clearInterval(poll);
+              modalText.textContent = `Scraping completed! ${status.total} jobs processed.`;
+              modalSpinner.style.display = 'none';
+              modalOkBtn.style.display = 'inline-flex';
+            } else {
+              modalText.textContent = `Scraping... ${status.completed}/${status.total} jobs done`;
+            }
+          } catch {
+            clearInterval(poll);
+            modalText.textContent = 'Failed to check scraping status.';
+            modalSpinner.style.display = 'none';
+            modalOkBtn.style.display = 'inline-flex';
+          }
+        }, 2000);
+      } catch {
         modalText.textContent = 'An error occurred during scraping.';
-      } finally {
         modalSpinner.style.display = 'none';
         modalOkBtn.style.display = 'inline-flex';
       }

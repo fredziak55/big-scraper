@@ -43,13 +43,13 @@
             <div class="card-stat">
               <div class="card-stat-label">Capacity</div>
               <div class="card-stat-value">
-                <%= r.capacityCm3 != null ? Number(r.capacityCm3).toLocaleString() + ' cm³' : '—' %>
+                <%= r.capacity_cm3 != null ? Number(r.capacity_cm3).toLocaleString() + ' cm³' : '—' %>
               </div>
             </div>
             <div class="card-stat">
               <div class="card-stat-label">Price / cm³</div>
               <div class="card-stat-value">
-                <%= r.pricePerCm3 != null ? '$' + Number(r.pricePerCm3).toFixed(4) : '—' %>
+                <%= r.price_per_cm3 != null ? '$' + Number(r.price_per_cm3).toFixed(4) : '—' %>
               </div>
             </div>
             <% if (r.dimensions) { %>

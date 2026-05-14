@@ -1,21 +1,25 @@
-import sqlite3 from 'sqlite3'
-import path from 'path'
-import { fileURLToPath } from 'url'
-import { open } from 'sqlite'
+import pg from 'pg'
 
-const __filename = fileURLToPath(import.meta.url)
-const __dirname = path.dirname(__filename)
+const pool = new pg.Pool({
+  host: process.env.PGHOST || 'localhost',
+  user: process.env.PGUSER || 'scraper',
+  password: process.env.PGPASSWORD || 'scraper',
+  database: process.env.PGDATABASE || 'bigscraper', //TODO czy powinny tutaj byćdefaulty wartości?
+  max: 20,
+})
 
-export const initializeDatabase = () => {
-  const db = new sqlite3.Database(__dirname + '/../../db/cars.db')
-  db.run('CREATE TABLE IF NOT EXISTS intercoolers (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, price REAL, dimensions TEXT, url TEXT UNIQUE, capacityCm3 REAL, pricePerCm3 REAL)')
-  db.close()
+export const initializeDatabase = async () => {
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS intercoolers (
+      id SERIAL PRIMARY KEY,
+      name TEXT,
+      price REAL,
+      dimensions TEXT,
+      url TEXT UNIQUE,
+      capacity_cm3 REAL,
+      price_per_cm3 REAL
+    )
+  `)
 }
 
-export const getDatabaseConnection = async () => {
-  return open({
-    filename: __dirname + '/../../db/cars.db',
-    driver: sqlite3.Database
-  })
-}
-
+export const getDatabaseConnection = () => pool;
