@@ -1,7 +1,6 @@
 "use strict"
 
 import express from 'express'
-import sqlite3 from 'sqlite3'
 import scrapeController from "./routes/scrape.route.js"
 import { initializeDatabase }  from "../src/models/database.model.js"
 import appRouter from './routes/app.route.js'
@@ -14,7 +13,7 @@ app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
 app.use(express.static('public'))
 
-initializeDatabase()
+await initializeDatabase()
 
 app.use('', appRouter);
 app.use('/intercoolers', intercoolersRouter);
