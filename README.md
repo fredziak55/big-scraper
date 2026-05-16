@@ -2,6 +2,9 @@
 
 Scrapes [intercooler product data](https://fmic.pl/uklad-chlodzenia/intercoolery) from fmic.pl, extracts dimensions from detail pages, computes volume and price-per-cm³ metrics, and stores everything in a local database for comparison.
 
+## Github Actions Status
+![Deploy Status](https://github.com/fredziak55/big-scraper/actions/workflows/deploy.yml/badge.svg)
+
 ## Architecture
 
 ```
