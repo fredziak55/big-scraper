@@ -1,1 +1,0 @@
-stwórz przy pomocy docker compose plik, w którym zawarty będzie obraz dla aplikacji node js oraz obraz redisa. Połącz je w jeden network tak, aby istniała możliwość połączenia z node js do redisa. Utwórz odpowiednie volumy dla aplikacji. Wystaw apliakcję node js na port 3001. Nie używaj dockerfile, umieść wszystko w docker compose, użyj volume
