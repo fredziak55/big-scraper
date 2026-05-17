@@ -32,6 +32,7 @@ services:
       - redis
     networks:
       - app-network
+    restart: unless-stopped
   worker:
     image: node:22-alpine
     working_dir: /app
@@ -53,6 +54,7 @@ services:
       - redis
     networks:
       - app-network
+    restart: unless-stopped
   postgres:
     image: postgres:16-alpine
     environment:
@@ -63,6 +65,7 @@ services:
       - pg_data:/var/lib/postgresql/data
     networks:
       - app-network
+    restart: unless-stopped
 
 volumes:
   redis_data:
