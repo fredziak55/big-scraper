@@ -142,25 +142,7 @@ src/
 
 Pushes to `master` trigger automatic deployment to a DigitalOcean droplet via SSH:
 
-1. `git pull origin master` in `/var/www/big-scraper/`
-2. `docker compose up -d --scale worker=3 --remove-orphans`
+### Via Digital Ocean
+Auto-start after droplet reboot
 
-Requires these GitHub secrets: `DO_HOST`, `DO_USER`, `DO_SSH_KEY`.
-
-### Auto-start after droplet reboot
-
-Add `restart: unless-stopped` to the `app`, `worker`, and `postgres` services in `docker-compose.yml` to ensure containers recover after a reboot.
-
-### Nightly restart via cron
-
-To gracefully restart all containers every night at 2:00 AM:
-
-```bash
-crontab -e
-```
-
-Add this line:
-
-```
-0 2 * * * cd /var/www/big-scraper && /usr/bin/docker compose restart
-```
+Nightly restart via crontab
