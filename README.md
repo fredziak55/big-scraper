@@ -1,6 +1,6 @@
 # big-scraper
 
-Scrapes [intercooler product data](https://fmic.pl/uklad-chlodzenia/intercoolery) from fmic.pl, extracts dimensions from detail pages, computes volume and price-per-cm³ metrics, and stores everything in a local database for comparison.
+Scrapes [intercooler product data](https://fmic.pl/uklad-chlodzenia/intercoolery) from fmic.pl, extracts dimensions from detail pages, computes volume and price-per-cm³ metrics, and stores everything in a PostgreSQL database for comparison.
 
 ## Github Actions Status
 ![Deploy Status](https://github.com/fredziak55/big-scraper/actions/workflows/deploy.yml/badge.svg)
@@ -8,35 +8,35 @@ Scrapes [intercooler product data](https://fmic.pl/uklad-chlodzenia/intercoolery
 ## Architecture
 
 ```
-┌───────────────────────────────────────────────────────────┐
-│                      docker compose                       │
-│                                                           │
-│   ┌──────────┐     ┌──────────────┐     ┌────────────┐  │
-│   │  Express  │────▶│  BullMQ      │────▶│   Worker   │  │
-│   │   App     │     │  (Redis)     │     │   x N      │  │
-│   │ :3000     │     │  :6379       │     │            │  │
-│   └──────────┘     └──────────────┘     └─────┬──────┘  │
-│                                               │          │
-│                                          ┌────▼──────┐  │
-│                                          │  SQLite   │  │
-│                                          │  (WAL)    │  │
-│                                          └───────────┘  │
-└───────────────────────────────────────────────────────────┘
+┌──────────────────────────────────────────────────────────────────┐
+│                        docker compose                             │
+│                                                                   │
+│  ┌──────────┐    ┌──────────────┐    ┌────────────┐              │
+│  │  Express  │───▶│    BullMQ    │───▶│   Worker   │              │
+│  │   App     │    │   (Redis)    │    │   x N      │              │
+│  │  :3000    │    │   :6379      │    │            │              │
+│  └──────────┘    └──────────────┘    └─────┬──────┘              │
+│                                             │                     │
+│                                        ┌────▼──────┐              │
+│                                        │ PostgreSQL │              │
+│                                        │  :5432     │              │
+│                                        └───────────┘              │
+└──────────────────────────────────────────────────────────────────┘
 ```
 
 ```mermaid
 sequenceDiagram
     User->>App: POST /scrape { max_pages: 5 }
-    App->>SQLite: Purge old data
+    App->>PostgreSQL: Purge old data
     App->>Redis: Enqueue jobs (page 1..5)
     loop For each job
         Redis->>Worker: Dispatch job { page: N }
         Worker->>fmic.pl: GET listing page N
         Worker->>fmic.pl: GET each product detail
-        Worker->>SQLite: INSERT products
+        Worker->>PostgreSQL: INSERT products
     end
     User->>App: GET /showall
-    App->>SQLite: SELECT all
+    App->>PostgreSQL: SELECT all
     App-->>User: Render product cards
 ```
 
@@ -47,7 +47,7 @@ sequenceDiagram
 | Runtime | Node.js 22 |
 | HTTP | Express 5 |
 | Queue | BullMQ + Redis |
-| Database | SQLite (WAL mode) |
+| Database | PostgreSQL 16 |
 | Scraping | Cheerio |
 | Templates | EJS |
 | Container | Docker Compose |
@@ -65,7 +65,8 @@ Open [http://localhost:3001](http://localhost:3001):
 
 - **Home** — enter page count, click "Run Scraper"
 - **/showall** — browse all scraped intercoolers sorted by price-per-cm³
-- **GET /intercoolers** — raw JSON API
+- **/intercoolers** — raw JSON API
+- **/scrape/status** — polling endpoint for scrape progress (waiting, active, completed, failed, done)
 
 ## Scaling Workers
 
@@ -80,45 +81,46 @@ docker compose up --scale worker=3
 docker compose up --scale worker=5
 ```
 
-BullMQ distributes jobs across all workers. SQLite WAL mode + busy timeout handles concurrent writes. Each worker also processes up to 5 jobs internally (`concurrency: 5`), so 3 workers = up to 15 concurrent page scrapes.
+BullMQ distributes jobs across all workers. PostgreSQL handles concurrent writes. Each worker processes up to 5 jobs internally (`concurrency: 5`), so 3 workers = up to 15 concurrent page scrapes.
 
 ## Data Model
 
 ```
 intercoolers
-├── id          INTEGER PRIMARY KEY
-├── name        TEXT
-├── price       REAL
-├── dimensions  TEXT          (e.g. "600 x 300 x 76 mm")
-├── url         TEXT UNIQUE
-├── capacityCm3 REAL          (volume in cm³)
-└── pricePerCm3 REAL          (PLN per cm³)
+├── id             SERIAL PRIMARY KEY
+├── name           TEXT
+├── price          REAL
+├── dimensions     TEXT             (e.g. "600x300x76 mm")
+├── url            TEXT UNIQUE
+├── capacity_cm3   REAL             (volume in cm³)
+└── price_per_cm3  REAL             (PLN per cm³)
 ```
 
 ## Project Structure
 
 ```
 src/
-├── index.js                    Express entry point
-├── controllers/                Route handlers
-│   ├── scrape.controller.js
-│   ├── app.controller.js
-│   └── intercoolers.controller.js
+├── index.js                      Express entry point
+├── controllers/                  Route handlers
+│   ├── scrape.controller.js      Enqueue + status polling
+│   ├── app.controller.js         Home page + /showall
+│   └── intercoolers.controller.js  JSON API
 ├── models/
-│   ├── scrape.model.js         Cheerio HTML parser (listing + detail)
-│   ├── database.model.js       SQLite init & connection
-│   └── intercoolers.model.js   CRUD for intercoolers
+│   ├── scrape.model.js           Cheerio HTML parser (listing + detail)
+│   ├── database.model.js         PostgreSQL pool & schema init
+│   ├── intercoolers.model.js     CRUD for intercoolers
+│   └── queue.model.js            BullMQ Queue (producer)
 ├── routes/
 │   ├── scrape.route.js
 │   ├── app.route.js
 │   └── intercoolers.route.js
 ├── utils/
-│   └── scrape.js               BullMQ producer (enqueues page jobs)
+│   └── scrape.js                 Enqueues page jobs into BullMQ
 ├── views/
-│   ├── index.ejs               Home page with scrape trigger
-│   └── showAll.ejs             Product comparison grid
+│   ├── index.ejs                 Home page with scrape trigger
+│   └── showAll.ejs               Product comparison grid (cards)
 └── queue/worker/
-    └── worker.js               BullMQ consumer (processes page jobs)
+    └── worker.js                 BullMQ Worker (consumer, concurrency: 5)
 ```
 
 ## Env Variables
@@ -129,3 +131,36 @@ src/
 | `PORT` | `3000` | Express listen port |
 | `REDIS_HOST` | `redis` | Redis hostname |
 | `REDIS_PORT` | `6379` | Redis port |
+| `PGHOST` | `postgres` | PostgreSQL hostname |
+| `PGUSER` | `scraper` | PostgreSQL user |
+| `PGPASSWORD` | `scraper` | PostgreSQL password |
+| `PGDATABASE` | `bigscraper` | PostgreSQL database name |
+
+## Deployment
+
+### Via GitHub Actions
+
+Pushes to `master` trigger automatic deployment to a DigitalOcean droplet via SSH:
+
+1. `git pull origin master` in `/var/www/big-scraper/`
+2. `docker compose up -d --scale worker=3 --remove-orphans`
+
+Requires these GitHub secrets: `DO_HOST`, `DO_USER`, `DO_SSH_KEY`.
+
+### Auto-start after droplet reboot
+
+Add `restart: unless-stopped` to the `app`, `worker`, and `postgres` services in `docker-compose.yml` to ensure containers recover after a reboot.
+
+### Nightly restart via cron
+
+To gracefully restart all containers every night at 2:00 AM:
+
+```bash
+crontab -e
+```
+
+Add this line:
+
+```
+0 2 * * * cd /var/www/big-scraper && /usr/bin/docker compose restart
+```
